@@ -326,7 +326,7 @@ spec:
       containers:
       - image: openpolicyagent/opa:0.23.2-istio
         imagePullPolicy: IfNotPresent
-        name: opa-envoy
+        name: opa-istio
         volumeMounts:
         - mountPath: /config
           name: proxy-config
