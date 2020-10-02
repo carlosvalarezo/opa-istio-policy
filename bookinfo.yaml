@@ -323,10 +323,22 @@ spec:
         version: v1
     spec:
       serviceAccountName: bookinfo-productpage
+      initContainers:
+        - name: proxy-init
+          image: openpolicyagent/proxy_init:v2
+          args: ["-p", "8000", "-u", "1111"]
+          securityContext:
+            capabilities:
+              add:
+              - NET_ADMIN
+            runAsNonRoot: false
+            runAsUser: 0
       containers:
       - image: openpolicyagent/opa:0.23.2-istio
         imagePullPolicy: IfNotPresent
         name: opa-istio
+        securityContext:
+            runAsUser: 1111
         volumeMounts:
         - mountPath: /config
           name: proxy-config
@@ -339,7 +351,9 @@ spec:
         - "--server"
         - "--addr=localhost:8181"
         - "--diagnostic-addr=0.0.0.0:8282"
-        - "--config-file=/config/proxy-config"
+        - "--set=plugins.envoy_ext_authz_grpc.addr=:9191"
+        - "--set=plugins.envoy_ext_authz_grpc.query=data.system.main"
+        - "--config-file=/config/proxy-config.yaml"
         - "/policy/policy.rego"
         - "--log-format=json-pretty"
         - "--set=decision_logs.console=true"
@@ -347,8 +361,10 @@ spec:
           httpGet:
             path: /health?plugins
             port: 8282
+            scheme: HTTP
         readinessProbe: 
           httpGet:
+            scheme: HTTP
             path: /health?plugins
             port: 8282
       - name: productpage
@@ -390,7 +406,7 @@ kind: ConfigMap
 metadata:
   name: proxy-config
 data:
-  proxy-config: |
+  proxy-config.yaml: |
     static_resources:
       listeners:
         - address:
