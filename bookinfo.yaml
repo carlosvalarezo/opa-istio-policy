@@ -340,7 +340,7 @@ spec:
         - "--addr=localhost:8181"   
         - "--diagnostic-addr=0.0.0.0:8282" 
         - "--config-file=/config/proxy-config.yaml"
-        - "/policy/policy.rego"
+        - "/policy/"
         - "--log-format=json-pretty"
         - "--set=decision_logs.console=true"
         - "--ignore=.*"
@@ -381,19 +381,15 @@ kind: ConfigMap
 metadata:
   name: opa-policy
 data:
-  policy.rego: |
+  policy_allow.rego: |
     package istio.authz
        
-    #http_request = input.attributes.request.http
-
     default allow = false
 
+
     allow {
-      input.method == "GET"
+       input.attributes.request.http.method == "GET"
     }
-
-
-
 ---
 
 ############################################################
