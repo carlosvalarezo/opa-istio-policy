@@ -16,4 +16,3 @@ To generate tokens:
 
 # links
 OPA: https://www.openpolicyagent.org/
-To generate tokens: 
